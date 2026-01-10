@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QUIZ ROYALE</title>
+    <title>SURVIVAL QUIZ - Game</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
         
@@ -71,21 +71,50 @@
         .header-left {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 12px;
         }
 
         .question-indicator {
-            width: 56px;
-            height: 56px;
+            width: 64px;
+            height: 64px;
             background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.8em;
+            font-size: 2.2em;
             font-weight: 900;
             font-family: 'JetBrains Mono', monospace;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .question-indicator:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .question-label-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .question-label-top {
+            font-size: 0.7em;
+            opacity: 0.4;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .question-label-main {
+            font-size: 0.9em;
+            opacity: 0.8;
+            font-weight: 600;
+            letter-spacing: 0.05em;
         }
 
         /* Center section - Player name */
@@ -522,6 +551,34 @@
             margin-top: 16px;
             font-weight: 500;
             color: #888888;
+            margin-bottom: 48px;
+        }
+
+        .play-again-btn {
+            display: inline-block;
+            padding: 18px 48px;
+            background: #ffffff;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1em;
+            font-weight: 700;
+            color: #000000;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            text-decoration: none;
+            margin-top: 32px;
+        }
+
+        .play-again-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(255, 255, 255, 0.3);
+        }
+
+        .play-again-btn:active {
+            transform: translateY(-2px);
         }
 
         .hidden {
@@ -562,9 +619,10 @@
         <div class="game-header">
             <!-- Left: Question indicator -->
             <div class="header-left">
-                <div class="question-indicator" id="question-number">-</div>
-                <div>
-                    <div class="stat-label">Question</div>
+                <div class="question-indicator" id="question-number">1</div>
+                <div class="question-label-container">
+                    <div class="question-label-top">Frage</div>
+                    <div class="question-label-main">Question</div>
                 </div>
             </div>
 
@@ -621,6 +679,7 @@
             <div class="end-screen">
                 <h1>Eliminated</h1>
                 <p>Better luck next time!</p>
+                <a href="index.html" class="play-again-btn">Play Again</a>
             </div>
         </div>
 
@@ -629,6 +688,7 @@
             <div class="end-screen">
                 <h1>Victory</h1>
                 <p>You are the last one standing!</p>
+                <a href="index.html" class="play-again-btn">Play Again</a>
             </div>
         </div>
     </div>

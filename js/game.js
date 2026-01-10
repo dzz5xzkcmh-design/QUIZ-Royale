@@ -268,29 +268,35 @@ function checkIfAllReady() {
     const readyCount = gameState.players.length;
     const totalCount = gameState.players.length;
     
-    document.getElementById('status-text').textContent = 
-        `Warte auf Spieler... ${readyCount}/${totalCount} Spieler sind bereit`;
+    // Update status message
+    if (readyCount < 2) {
+        document.getElementById('status-text').textContent = 
+            `Warte auf weitere Spieler... (${readyCount}/2 Minimum)`;
+    } else {
+        document.getElementById('status-text').textContent = 
+            `${readyCount} Spieler bereit - Spiel startet gleich...`;
+    }
     
     // Update players left stat
     const activePlayers = gameState.players.filter(p => !p.eliminated);
     document.getElementById('players-left').textContent = activePlayers.length;
     
-    // If all ready, start game after 2 seconds
-    // Allow starting with just 1 player for testing
-    if (readyCount >= 1 && !gameState.gameStarted) {
+    // Start game only with 2 or more players
+    if (readyCount >= 2 && !gameState.gameStarted) {
         gameState.gameStarted = true;
         
-        console.log('✅ ALL PLAYERS READY! Broadcasting start...');
+        console.log('✅ ENOUGH PLAYERS! Starting game...');
+        console.log('👥 Player count:', readyCount);
         
         // Broadcast game start
         sendRequest('*broadcast-message*', JSON.stringify({
             type: 'start-game'
         }));
         
-        // Start locally too
+        // Start locally after short delay
         setTimeout(() => {
             handleGameStart();
-        }, 2000);
+        }, 1500);
     }
 }
 
@@ -313,6 +319,12 @@ function handleGameStart() {
 // Start a question
 function startQuestion(index) {
     console.log('🔍 startQuestion called with index:', index);
+    
+    // Check if game is over
+    if (gameState.gameOver) {
+        console.log('⏹️ Game is over - not starting new question');
+        return;
+    }
     
     // Check if QUESTIONS exists
     if (typeof QUESTIONS === 'undefined' || !QUESTIONS || QUESTIONS.length === 0) {
@@ -693,6 +705,28 @@ function findAndEliminateSlowest() {
     
     if (answers.length === 0) return;
     
+    // If only 1 player (solo mode), skip elimination and go to next question
+    const activePlayers = gameState.players.filter(p => !p.eliminated);
+    if (activePlayers.length === 1) {
+        console.log('👤 Solo mode: Skipping elimination, going to next question');
+        
+        // Show success message
+        document.getElementById('status-text').textContent = 
+            'Richtig! Nächste Frage...';
+        
+        // Wait 2 seconds, then start next question
+        setTimeout(() => {
+            // Reset answers
+            gameState.playerAnswers = {};
+            
+            // Show countdown before next question
+            showCountdown(3, () => {
+                startQuestion(gameState.currentQuestionIndex + 1);
+            });
+        }, 2000);
+        return;
+    }
+    
     // Find slowest
     const slowest = answers.reduce((prev, curr) => {
         return curr[1].time > prev[1].time ? curr : prev;
@@ -731,6 +765,7 @@ function handlePlayerEliminated(data) {
     // Check if I was eliminated
     if (data.playerId === gameState.playerId) {
         gameState.eliminated = true;
+        gameState.gameOver = true; // Mark game as over for eliminated player
         setTimeout(() => {
             showEliminatedScreen();
         }, 2000);
@@ -747,14 +782,30 @@ function handlePlayerEliminated(data) {
     // Check remaining players
     const remaining = gameState.players.filter(p => !p.eliminated);
     
+    console.log('👥 Remaining players:', remaining.length);
+    
     if (remaining.length === 1) {
         // Only one left - winner!
+        console.log('🏆 We have a winner!');
+        gameState.gameOver = true; // Mark game as over
         setTimeout(() => {
             showWinner();
         }, 3000);
+    } else if (remaining.length === 0) {
+        // Edge case: all eliminated somehow
+        console.log('⚠️ No players remaining - ending game');
+        gameState.gameOver = true;
     } else {
+        // More than 1 player remaining - continue game
+        console.log('▶️ Continuing to next question');
         // Show countdown before next question
         setTimeout(() => {
+            // Double check game isn't over
+            if (gameState.gameOver) {
+                console.log('⏹️ Game ended during countdown - not starting new question');
+                return;
+            }
+            
             // Reset answers
             gameState.playerAnswers = {};
             
