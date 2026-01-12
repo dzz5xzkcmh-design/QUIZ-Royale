@@ -12,7 +12,10 @@ const gameState = {
     timerInterval: null,
     eliminated: false,
     gameOver: false,
-    myAnswerTime: null
+    myAnswerTime: null,
+    maxPlayers: 2, // Default minimum
+    isHost: false,
+    gameStarted: false
 };
 
 let socket = null;
@@ -26,6 +29,11 @@ function initGame() {
     gameState.roomCode = urlParams.get('room');
     gameState.playerName = urlParams.get('player');
     gameState.playerId = parseInt(urlParams.get('playerId'));
+    gameState.maxPlayers = parseInt(urlParams.get('maxPlayers')) || 2;
+    gameState.isHost = urlParams.get('isHost') === 'true';
+    
+    console.log('🎯 Max players:', gameState.maxPlayers);
+    console.log('👑 Is host:', gameState.isHost);
     
     // Get players from URL (passed from lobby)
     const playersParam = urlParams.get('players');
@@ -266,12 +274,12 @@ function handlePlayerReady(data) {
 function checkIfAllReady() {
     // Count ready players (assume all in gameState.players are ready)
     const readyCount = gameState.players.length;
-    const totalCount = gameState.players.length;
+    const requiredCount = gameState.maxPlayers;
     
     // Update status message
-    if (readyCount < 2) {
+    if (readyCount < requiredCount) {
         document.getElementById('status-text').textContent = 
-            `Warte auf weitere Spieler... (${readyCount}/2 Minimum)`;
+            `Warte auf weitere Spieler... (${readyCount}/${requiredCount})`;
     } else {
         document.getElementById('status-text').textContent = 
             `${readyCount} Spieler bereit - Spiel startet gleich...`;
@@ -281,12 +289,12 @@ function checkIfAllReady() {
     const activePlayers = gameState.players.filter(p => !p.eliminated);
     document.getElementById('players-left').textContent = activePlayers.length;
     
-    // Start game only with 2 or more players
-    if (readyCount >= 2 && !gameState.gameStarted) {
+    // Start game only when exact player count is reached
+    if (readyCount >= requiredCount && !gameState.gameStarted) {
         gameState.gameStarted = true;
         
-        console.log('✅ ENOUGH PLAYERS! Starting game...');
-        console.log('👥 Player count:', readyCount);
+        console.log('✅ REQUIRED PLAYER COUNT REACHED! Starting game...');
+        console.log('👥 Player count:', readyCount, '/', requiredCount);
         
         // Broadcast game start
         sendRequest('*broadcast-message*', JSON.stringify({

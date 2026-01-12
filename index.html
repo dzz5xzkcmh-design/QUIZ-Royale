@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QUIZ ROYALE</title>
+    <title>SURVIVAL QUIZ</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
         
@@ -227,6 +227,54 @@
             transform: none;
         }
 
+        .player-count-selector {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .count-btn {
+            width: 100%;
+            padding: 14px;
+            font-size: 1.1em;
+            font-weight: 700;
+            font-family: 'Inter', sans-serif;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            color: #ffffff;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .count-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .count-btn.selected {
+            background: #ffffff;
+            color: #000000;
+            border-color: #ffffff;
+            transform: scale(1.05);
+        }
+
+        .selected-count {
+            text-align: center;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            font-size: 0.95em;
+            color: #888888;
+        }
+
+        .selected-count strong {
+            color: #ffffff;
+            font-size: 1.1em;
+        }
+
         .info-box {
             margin-top: 32px;
             padding: 20px;
@@ -285,16 +333,98 @@
         }
 
         @media (max-width: 600px) {
+            .container {
+                width: 95%;
+            }
+
+            .logo {
+                margin-bottom: 40px;
+            }
+
             h1 {
                 font-size: 2.2em;
             }
 
+            .subtitle {
+                font-size: 0.85em;
+            }
+
             .card {
-                padding: 36px 24px;
+                padding: 32px 20px;
+            }
+
+            label {
+                font-size: 0.75em;
+            }
+
+            input {
+                padding: 14px 16px;
+                font-size: 0.95em;
+            }
+
+            button {
+                padding: 16px;
+                font-size: 0.9em;
+            }
+
+            .info-box {
+                padding: 16px;
+                margin-top: 24px;
+            }
+
+            .info-box p {
+                font-size: 0.8em;
+            }
+
+            .corner-tl,
+            .corner-br {
+                width: 30px;
+                height: 30px;
             }
 
             .footer {
-                bottom: 16px;
+                font-size: 0.65em;
+                bottom: 12px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            h1 {
+                font-size: 1.8em;
+                letter-spacing: -0.02em;
+            }
+
+            .subtitle {
+                font-size: 0.75em;
+            }
+
+            .card {
+                padding: 28px 16px;
+            }
+
+            input {
+                padding: 12px 14px;
+                font-size: 0.9em;
+            }
+
+            button {
+                padding: 14px;
+                font-size: 0.85em;
+                letter-spacing: 0.05em;
+            }
+        }
+
+        @media (max-height: 700px) {
+            .logo {
+                margin-bottom: 30px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .card {
+                padding: 24px 20px;
             }
         }
     </style>
@@ -302,7 +432,7 @@
 <body>
     <div class="container">
         <div class="logo">
-            <h1>QUIZ ROYALE</h1>
+            <h1>SURVIVAL QUIZ</h1>
             <div class="subtitle">Last One Standing</div>
         </div>
 
@@ -323,11 +453,30 @@
                     >
                 </div>
 
+                <!-- Host: Player count selection -->
+                <div class="form-group" id="host-settings" style="display: none;">
+                    <label>Number of Players</label>
+                    <div class="player-count-selector">
+                        <button type="button" class="count-btn" data-count="2">2</button>
+                        <button type="button" class="count-btn" data-count="3">3</button>
+                        <button type="button" class="count-btn" data-count="4">4</button>
+                        <button type="button" class="count-btn" data-count="5">5</button>
+                        <button type="button" class="count-btn" data-count="6">6</button>
+                        <button type="button" class="count-btn" data-count="7">7</button>
+                        <button type="button" class="count-btn" data-count="8">8</button>
+                        <button type="button" class="count-btn" data-count="9">9</button>
+                        <button type="button" class="count-btn" data-count="10">10</button>
+                    </div>
+                    <div class="selected-count" id="selected-count">
+                        Selected: <strong>2 Players</strong>
+                    </div>
+                </div>
+
                 <button type="submit">Join Battle</button>
             </form>
 
             <div class="info-box">
-                <p>
+                <p id="info-text">
                     Everyone who opens this link joins the <strong>same room</strong>.<br>
                     Perfect for QR codes and easy sharing.
                 </p>
@@ -344,6 +493,52 @@
         
         const form = document.getElementById('join-form');
         const nameInput = document.getElementById('player-name');
+        const hostSettings = document.getElementById('host-settings');
+        const infoText = document.getElementById('info-text');
+        
+        let selectedPlayerCount = 2; // Default
+        let isHost = false;
+
+        // Check if this is the first player (host)
+        const urlParams = new URLSearchParams(window.location.search);
+        const maxPlayers = urlParams.get('maxPlayers');
+        
+        if (!maxPlayers) {
+            // First player = Host
+            isHost = true;
+            hostSettings.style.display = 'block';
+            infoText.innerHTML = `
+                👑 <strong>You are the host!</strong><br>
+                Choose how many players will compete (2-10).
+            `;
+            
+            // Setup count buttons
+            const countButtons = document.querySelectorAll('.count-btn');
+            countButtons.forEach(btn => {
+                // Select 2 by default
+                if (btn.dataset.count === '2') {
+                    btn.classList.add('selected');
+                }
+                
+                btn.addEventListener('click', () => {
+                    // Remove selection from all
+                    countButtons.forEach(b => b.classList.remove('selected'));
+                    // Select clicked button
+                    btn.classList.add('selected');
+                    selectedPlayerCount = parseInt(btn.dataset.count);
+                    document.getElementById('selected-count').innerHTML = 
+                        `Selected: <strong>${selectedPlayerCount} Players</strong>`;
+                });
+            });
+        } else {
+            // Not host - joining existing game
+            isHost = false;
+            selectedPlayerCount = parseInt(maxPlayers);
+            infoText.innerHTML = `
+                🎮 Joining battle for <strong>${selectedPlayerCount} players</strong>!<br>
+                Waiting for everyone to join...
+            `;
+        }
 
         form.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -363,7 +558,8 @@
                 eliminated: false
             }];
             
-            const gameUrl = `game.html?room=${FIXED_ROOM_CODE}&player=${encodeURIComponent(playerName)}&playerId=${playerId}&players=${encodeURIComponent(JSON.stringify(players))}`;
+            // Build URL with maxPlayers parameter
+            const gameUrl = `game.html?room=${FIXED_ROOM_CODE}&player=${encodeURIComponent(playerName)}&playerId=${playerId}&players=${encodeURIComponent(JSON.stringify(players))}&maxPlayers=${selectedPlayerCount}&isHost=${isHost}`;
             
             window.location.href = gameUrl;
         });
