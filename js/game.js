@@ -531,8 +531,9 @@ function submitAnswer() {
         console.log('✅ I answered! Time:', gameState.timer.toFixed(1) + 's');
         console.log('📊 My playerAnswers:', gameState.playerAnswers);
         
-        // Show feedback
-        showFeedback(`🎉 Du bist eine Runde weiter! (Zeit: ${gameState.timer.toFixed(1)}s)`, true);
+        // NO success feedback - keep them in suspense!
+        // Just show that they answered
+        showFeedback(`Antwort abgegeben (${gameState.timer.toFixed(1)}s)`, true);
         
         // Broadcast answer
         sendRequest('*broadcast-message*', JSON.stringify({
@@ -548,10 +549,10 @@ function submitAnswer() {
         // Disable submit button
         document.getElementById('submit-btn').disabled = true;
         
-        // ALWAYS go to waiting room after answering
+        // Go to waiting room immediately (no delay)
         setTimeout(() => {
             showWaitingScreen();
-        }, 1500); // Show success message for 1.5s, then go to waiting room
+        }, 800); // Very short delay just to show the feedback
         
         // Check if all answered (including me!)
         const activePlayers = gameState.players.filter(p => !p.eliminated);
@@ -560,10 +561,10 @@ function submitAnswer() {
         
         if (answeredCount === activePlayers.length) {
             console.log('✅ ALL PLAYERS ANSWERED! Starting elimination...');
-            // Wait a bit so everyone is in waiting room, then find slowest
+            // Wait so everyone is in waiting room, then find slowest
             setTimeout(() => {
                 findAndEliminateSlowest();
-            }, 3000); // 3 seconds so everyone sees the waiting room
+            }, 2000); // 2 seconds - everyone should be in waiting room now
         }
         
     } else {
