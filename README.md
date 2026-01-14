@@ -1,23 +1,22 @@
-# WWM-BattleRoyale
 # 💰 Wer wird Millionär? - Battle Royale Edition
 
 Ein Multiplayer-Quiz-Spiel im "Battle Royale" Stil, bei dem 10 Spieler gegeneinander antreten und der langsamste Spieler jede Runde eliminiert wird.
 
-## 📁 Projektstruktur
+## 📋 Projektstruktur
 
 ```
 wwm-battle-royale/
-├── index.html              # Lobby & Spieler-Beitritt
-├── game.html               # Hauptspiel
+├── index.html          # Lobby & Spieler-Beitritt (NEU!)
+├── game.html           # Hauptspiel
 ├── js/
-│   ├── game.js            # Spiellogik
-│   └── questions.js       # Fragendatenbank
-└── README.md              # Diese Datei
+│   ├── game.js        # Spiellogik (Gamemaster-System)
+│   └── questions.js   # Fragendatenbank
+└── README.md          # Diese Datei
 ```
 
 ## 🚀 Setup in VS Code
 
-### 1. **Projekt erstellen**
+### 1. Projekt erstellen
 
 ```bash
 # Ordner erstellen
@@ -28,274 +27,295 @@ cd wwm-battle-royale
 git init
 ```
 
-### 2. **Dateien anlegen**
+### 2. Dateien anlegen
 
 Erstelle die folgenden Dateien in VS Code:
 
-#### **📄 index.html**
-- Kopiere den Code aus dem Artifact "index.html - Lobby Seite"
-- Speichere als `index.html` im Hauptordner
+#### **`index.html`** - Lobby & Spieler-Beitritt
+👉 Verwende die Datei `lobby.html` aus dem Download
+- Umbenennen in `index.html`
+- Erste Seite die Spieler öffnen
+- Host-Erkennung (erster Spieler = Host)
+- Live-Spielerliste
 
-#### **📄 game.html**
-- Kopiere den Code aus dem Artifact "game.html - Hauptspiel"
-- Speichere als `game.html` im Hauptordner
+#### **`game.html`** - Hauptspiel
+👉 Verwende die Datei `game-bw.html` aus dem Download
+- Umbenennen in `game.html` (falls nötig)
+- Das eigentliche Quiz-Spiel
+- Warteraum, Fragen, Eliminierung
 
-#### **📂 js/ Ordner erstellen**
+#### **`js/game.js`** - Spiellogik
+👉 Verwende die Datei `game-gamemaster.js` aus dem Download
+- Ordner `js/` erstellen
+- Umbenennen in `game.js`
+- Gamemaster-System implementiert
 
-```bash
-mkdir js
-```
-
-#### **📄 js/questions.js**
-- Kopiere den Code aus dem Artifact "questions.js - Fragendatenbank"
-- Speichere als `js/questions.js`
-
-#### **📄 js/game.js**
-- Kopiere den Code aus dem Artifact "game.js - Hauptspiellogik"
-- Speichere als `js/game.js`
-
-### 3. **Live Server installieren (empfohlen)**
-
-```bash
-# VS Code Extension installieren:
-# 1. Drücke Ctrl+Shift+X (oder Cmd+Shift+X auf Mac)
-# 2. Suche nach "Live Server"
-# 3. Installiere "Live Server" von Ritwick Dey
-```
-
-### 4. **Spiel starten**
-
-1. Öffne `index.html` in VS Code
-2. Rechtsklick → "Open with Live Server"
-3. Browser öffnet sich automatisch
-
-**ODER** manuell:
-```bash
-# Einfach index.html im Browser öffnen
-# z.B. durch Doppelklick oder:
-open index.html  # Mac
-start index.html # Windows
-```
-
-## 🎮 Spielablauf
-
-### **Phase 1: Lobby**
-1. Spieler gibt seinen Namen ein
-2. Lobby zeigt Raum-Code
-3. Bis zu 10 Spieler können beitreten
-4. Host startet das Spiel (min. 2 Spieler)
-
-### **Phase 2: Warteraum**
-- 3D-Szene mit allen Spielernamen (A-Frame)
-- Nach jeder Frage: Countdown zur nächsten Runde
-- Eliminierte Spieler verschwinden aus der Szene
-
-### **Phase 3: Frage**
-- **Multiple Choice**: 4 Antwortmöglichkeiten
-- **Sortierung**: Drag & Drop zum Sortieren
-- **Zeitlimit**: 45 Sekunden pro Frage
-- **Fehler**: Bei falscher Antwort kann man es erneut versuchen (Zeit läuft weiter!)
-
-### **Phase 4: Eliminierung**
-- Der **langsamste** Spieler wird eliminiert
-- Timeout = automatische Eliminierung
-- Spiel geht weiter bis nur noch 1 Spieler übrig ist
-
-### **Phase 5: Gewinner**
-- Letzter überlebender Spieler gewinnt!
-
-## 🔧 Technische Details
-
-### **WebSocket Integration**
-
-Das Spiel nutzt den WebSocket-Server deines Professors:
-
-```javascript
-const webRoomsWebSocketServerAddr = 'https://nosch.uber.space/web-rooms/';
-```
-
-#### **Wichtige Message-Types:**
-
-```javascript
-// Client → Server
-['*enter-room*', roomName]           // Raum beitreten
-['*broadcast-message*', type, data]  // Nachricht an alle senden
-['player-ready', playerData]         // Spieler bereit
-['player-answered', answerData]      // Antwort abgegeben
-
-// Server → Client
-['*client-id*', id]                  // Client-ID vom Server
-['*client-count*', count]            // Anzahl Clients
-['player-joined', playerData]        // Neuer Spieler
-['start-game']                       // Spiel starten
-['eliminate-player', playerId]       // Spieler eliminiert
-```
-
-### **A-Frame 3D-Szene**
-
-Die 3D-Szene zeigt Spielernamen im Kreis an:
-
-```html
-<a-scene embedded>
-  <a-entity id="player-names" position="0 1.6 -5">
-    <!-- Dynamisch generierte Spielernamen -->
-  </a-entity>
-  <a-sky color="#0a1128"></a-sky>
-</a-scene>
-```
-
-## 📝 Fragen hinzufügen/bearbeiten
-
-Öffne `js/questions.js`:
-
-```javascript
-const QUESTIONS = [
-    {
-        type: 'multiple-choice',
-        question: 'Deine Frage hier?',
-        answers: ['Antwort A', 'Antwort B', 'Antwort C', 'Antwort D'],
-        correct: 1  // Index der richtigen Antwort (0-3)
-    },
-    {
-        type: 'sorting',
-        question: 'Ordne folgende Items:',
-        items: ['Item 1', 'Item 2', 'Item 3', 'Item 4'],
-        correct: [2, 0, 3, 1]  // Richtige Reihenfolge (Indizes)
-    }
-];
-```
-
-## 🎨 Design anpassen
-
-### **Farben ändern**
-
-In `index.html` und `game.html` im `<style>` Block:
-
-```css
-/* Hintergrund */
-background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-
-/* Goldene Akzente (Buttons, Timer) */
-color: #ffd700;
-
-/* Fehler-Farbe */
-border-color: #ff4444;
-```
-
-### **Timer-Limit anpassen**
-
-In `js/game.js`:
-
-```javascript
-gameState.timeLeft = 45;  // Sekunden pro Frage
-```
-
-## 🐛 Debugging
-
-### **Browser Console öffnen:**
-- Chrome/Edge: `F12` oder `Ctrl+Shift+I`
-- Firefox: `F12`
-- Safari: `Cmd+Option+I`
-
-### **Häufige Probleme:**
-
-1. **WebSocket verbindet nicht:**
-   ```javascript
-   // Prüfe in der Console:
-   console.log(socket.readyState);
-   // 0 = CONNECTING, 1 = OPEN, 2 = CLOSING, 3 = CLOSED
-   ```
-
-2. **A-Frame lädt nicht:**
-   - Überprüfe Internet-Verbindung (CDN-Zugriff)
-   - Öffne Browser-Console für Fehler
-
-3. **Spieler werden nicht angezeigt:**
-   - Prüfe `gameState.players` in der Console
-   - Überprüfe WebSocket-Nachrichten
-
-## 📤 GitHub Upload
-
-```bash
-# Git initialisieren
-git init
-
-# .gitignore erstellen
-echo "node_modules/
-.DS_Store
-*.log" > .gitignore
-
-# Dateien hinzufügen
-git add .
-git commit -m "Initial commit: WWM Battle Royale"
-
-# GitHub Repository erstellen (auf github.com)
-# Dann:
-git remote add origin https://github.com/DEIN-USERNAME/wwm-battle-royale.git
-git branch -M main
-git push -u origin main
-```
-
-## 🎯 Nächste Schritte
-
-### **Must-Have Features:**
-- [ ] Echter Multiplayer mit Server-Synchronisation
-- [ ] Bessere Eliminierungs-Logik (Server-seitig)
-- [ ] QR-Code Generator für Lobby
-- [ ] Persistente Highscores
-
-### **Nice-to-Have:**
-- [ ] Sound-Effekte
-- [ ] Animationen bei Eliminierung
-- [ ] Chat-Funktion
-- [ ] Admin-Panel
-- [ ] Mobile-optimierte UI
-- [ ] Verschiedene Schwierigkeitsstufen
-
-## 📚 Ressourcen
-
-- **WebSocket Dokumentation:** [MDN WebSocket](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket)
-- **A-Frame Docs:** [aframe.io](https://aframe.io/docs/)
-- **Prof-Code Referenz:** Siehe mitgelieferte Datei
-
-## 🤝 Zusammenarbeit
-
-Für Gruppenarbeit:
-
-1. **Aufgaben verteilen:**
-   - Person A: Frontend (HTML/CSS)
-   - Person B: Spiellogik (game.js)
-   - Person C: WebSocket Integration
-   - Person D: 3D-Szene & Animationen
-
-2. **Git Branches nutzen:**
-   ```bash
-   git checkout -b feature/player-ui
-   # Änderungen machen
-   git commit -m "Add player UI"
-   git push origin feature/player-ui
-   # Pull Request auf GitHub erstellen
-   ```
-
-## 📞 Support
-
-Bei Problemen:
-1. Browser Console checken (`F12`)
-2. Network Tab für WebSocket-Probleme
-3. GitHub Issues erstellen
-4. Prof/Kommilitonen fragen
-
-## ✅ Checkliste vor Abgabe
-
-- [ ] Alle Dateien vorhanden
-- [ ] Code kommentiert
-- [ ] README.md ausgefüllt
-- [ ] Spiel getestet (min. 2 Browser-Tabs)
-- [ ] Git Repository erstellt
-- [ ] Dokumentation vollständig
-- [ ] Screenshots/Video für Präsentation
+#### **`js/questions.js`** - Fragen
+👉 Verwende die Datei `questions.js` aus dem Download
+- 40 Multiple-Choice Fragen
+- Automatisches Shuffle
 
 ---
 
-**Viel Erfolg mit deinem Semesterprojekt! 🚀**
+## 🎮 Gamemaster-System
 
+### Wie es funktioniert:
+
+```
+┌─────────────────────────────────────────┐
+│  ERSTER SPIELER = GAMEMASTER (HOST)    │
+├─────────────────────────────────────────┤
+│                                         │
+│  ✅ Verteilt Fragen an alle            │
+│  ✅ Sammelt Antworten                  │
+│  ✅ Eliminiert langsamsten Spieler     │
+│  ✅ Startet nächste Runde              │
+│                                         │
+└─────────────────────────────────────────┘
+         ↓              ↓              ↓
+    Spieler 1      Spieler 2      Spieler 3
+     (wartet)      (wartet)       (wartet)
+```
+
+### Ablauf:
+
+1. **Spieler 1 öffnet Link** → Wird automatisch zum Host 👑
+2. **Weitere Spieler joinen** → Sehen Host in der Lobby
+3. **Host wählt Spieleranzahl** (2-10)
+4. **Host wartet bis alle da sind** → Button wird aktiv
+5. **Host klickt "Spiel starten"** → Alle werden weitergeleitet
+6. **Host verteilt Fragen** → Alle antworten
+7. **Host eliminiert Langsamsten** → Nächste Runde
+
+---
+
+## 🌐 GitHub Pages Deployment
+
+### Option A: Über GitHub Web Interface
+
+1. **Repository erstellen:**
+   - Gehe zu https://github.com/new
+   - Name: `wwm-battle-royale`
+   - Public
+   - Create repository
+
+2. **Dateien hochladen:**
+   - Klicke "uploading an existing file"
+   - Ziehe alle Dateien rein:
+     - `index.html`
+     - `game.html`
+     - `js/game.js`
+     - `js/questions.js`
+   - Commit
+
+3. **GitHub Pages aktivieren:**
+   - Settings → Pages
+   - Source: `main` branch
+   - Save
+
+4. **URL öffnen:**
+   ```
+   https://DEIN-USERNAME.github.io/wwm-battle-royale/
+   ```
+
+### Option B: Via Git CLI
+
+```bash
+# Im Projekt-Ordner
+git add .
+git commit -m "Initial commit - Gamemaster system"
+git branch -M main
+git remote add origin https://github.com/DEIN-USERNAME/wwm-battle-royale.git
+git push -u origin main
+
+# GitHub Pages aktivieren (siehe Option A Schritt 3)
+```
+
+---
+
+## 🧪 Testen
+
+### Lokal testen (mit Live Server):
+
+1. **VS Code Extension installieren:**
+   - "Live Server" von Ritwick Dey
+
+2. **Server starten:**
+   - Rechtsklick auf `index.html`
+   - "Open with Live Server"
+
+3. **Mehrere Tabs öffnen:**
+   - Tab 1: `http://localhost:5500/index.html` (wird Host)
+   - Tab 2: `http://localhost:5500/index.html` (Spieler)
+   - Tab 3: `http://localhost:5500/index.html` (Spieler)
+
+### Online testen:
+
+1. Öffne deine GitHub Pages URL
+2. Kopiere den Link
+3. Öffne in mehreren Tabs/Geräten
+4. Erster = Host, Rest = Spieler
+
+---
+
+## 📱 QR-Code für Events
+
+### QR-Code erstellen:
+
+1. Gehe zu: https://www.qr-code-generator.com/
+2. Gib deine URL ein:
+   ```
+   https://DEIN-USERNAME.github.io/wwm-battle-royale/
+   ```
+3. Download QR-Code
+4. Drucken/Anzeigen bei Event
+
+### Verwendung:
+
+- Alle scannen den gleichen QR-Code
+- Erster Scanner = Host
+- Rest = Spieler
+- Host startet wenn alle da sind
+
+---
+
+## 🎯 Features
+
+### ✅ Gamemaster-System
+- Erster Spieler wird automatisch Host
+- Host kontrolliert komplettes Spiel
+- Keine Desynchronisation mehr
+
+### ✅ Live-Lobby
+- Echtzeit Spielerliste
+- Alle sehen wer beigetreten ist
+- Countdown bis Spielstart
+
+### ✅ Faire Eliminierung
+- Host sammelt ALLE Antworten
+- Wartet bis ALLE geantwortet haben
+- Eliminiert dann den Langsamsten
+
+### ✅ Responsive Design
+- Funktioniert auf Desktop & Mobile
+- Touch-optimiert
+- Elegantes Schwarz-Weiß Design
+
+### ✅ 40 Quiz-Fragen
+- Nur Multiple-Choice
+- Automatisch gemischt
+- Verschiedene Schwierigkeiten
+
+---
+
+## 🔧 Anpassungen
+
+### Spieleranzahl ändern:
+
+In `index.html` (Lobby):
+- Standard ist 2-10 wählbar
+- Code ist bereits fertig ✅
+
+### Fragen ändern:
+
+In `js/questions.js`:
+```javascript
+const QUESTIONS_POOL = [
+    {
+        type: 'multiple',
+        question: 'Deine Frage?',
+        answers: ['A', 'B', 'C', 'D'],
+        correct: 0  // Index der richtigen Antwort (0-3)
+    },
+    // Mehr Fragen...
+];
+```
+
+### Design anpassen:
+
+In `game.html` und `index.html`:
+- Farben im `<style>` Bereich
+- Aktuell: Elegantes Schwarz-Weiß
+- Schriftarten: Inter + JetBrains Mono
+
+---
+
+## 🐛 Troubleshooting
+
+### "Alle werden zu Hosts"
+❌ **Problem:** Alte Dateien im Browser-Cache
+✅ **Lösung:** Hard Refresh (Strg+Shift+R) oder Inkognito-Modus
+
+### "Spieler sehen sich nicht"
+❌ **Problem:** WebSocket verbindet nicht
+✅ **Lösung:** 
+- Console öffnen (F12)
+- Prüfe auf Fehler
+- WebSocket URL prüfen: `wss://nosch.uber.space/web-rooms/`
+
+### "Spiel startet nicht"
+❌ **Problem:** Host klickt zu früh
+✅ **Lösung:** Warte bis Spieleranzahl erreicht ist (Button wird dann aktiv)
+
+### "Host disconnected"
+❌ **Problem:** Host hat Seite geschlossen
+✅ **Lösung:** Spiel neu starten (by design - Host = Spielleiter)
+
+---
+
+## 📊 Broadcast-Nachrichten
+
+### Lobby:
+- `player-joined` - Jemand ist beigetreten
+- `host-announcement` - Host teilt mit wer er ist
+- `host-start-game` - Host startet das Spiel
+
+### Game:
+- `host-question` - Host verteilt Frage
+- `player-answer` - Spieler sendet Antwort (nur an Host)
+- `host-elimination` - Host eliminiert Spieler
+- `host-winner` - Host erklärt Gewinner
+
+---
+
+## 🎓 Technologie-Stack
+
+- **Frontend:** Vanilla JavaScript (kein Framework)
+- **Styling:** Pure CSS (Glassmorphism-Design)
+- **WebSocket:** `wss://nosch.uber.space/web-rooms/`
+- **Hosting:** GitHub Pages (kostenlos)
+
+---
+
+## 📝 Changelog
+
+### v2.0 - Gamemaster System (14.01.2026)
+- ✅ Separate Lobby implementiert
+- ✅ Gamemaster-Architektur (Host kontrolliert alles)
+- ✅ Live-Spielerliste in Lobby
+- ✅ Faire Eliminierung (Host wartet auf alle)
+- ✅ 40 Multiple-Choice Fragen
+- ✅ Responsive Design
+
+### v1.0 - Initial Release
+- ⚠️ Alte Version (nicht mehr verwenden)
+
+---
+
+## 🙏 Credits
+
+Entwickelt für Events und Partys.
+WebSocket-Server: nosch.uber.space
+
+---
+
+## 📧 Support
+
+Bei Problemen:
+1. Console öffnen (F12)
+2. Fehler kopieren
+3. GitHub Issues erstellen
+
+---
+
+**Viel Spaß beim Spielen! 🎮🏆**
