@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SURVIVAL QUIZ</title>
+    <title>Quiz Royale - Lobby</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
         
@@ -39,21 +39,8 @@
             z-index: 0;
         }
 
-        /* Vignette effect */
-        body::after {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at center, transparent 0%, rgba(0, 0, 0, 0.5) 100%);
-            pointer-events: none;
-            z-index: 0;
-        }
-
         .container {
-            max-width: 480px;
+            max-width: 600px;
             width: 90%;
             position: relative;
             z-index: 1;
@@ -61,7 +48,7 @@
 
         .logo {
             text-align: center;
-            margin-bottom: 60px;
+            margin-bottom: 40px;
             animation: fadeInDown 0.8s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
@@ -101,7 +88,7 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
             border-radius: 16px;
-            padding: 48px;
+            padding: 40px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
             animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s backwards;
             position: relative;
@@ -119,35 +106,38 @@
             }
         }
 
-        /* Subtle shine effect on hover */
-        .card::before {
-            content: '';
+        .corner-tl,
+        .corner-br {
             position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(
-                45deg,
-                transparent 30%,
-                rgba(255, 255, 255, 0.03) 50%,
-                transparent 70%
-            );
-            transform: translateX(-100%) translateY(-100%);
-            transition: transform 0.6s;
+            width: 40px;
+            height: 40px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
         }
 
-        .card:hover::before {
-            transform: translateX(0) translateY(0);
+        .corner-tl {
+            top: -1px;
+            left: -1px;
+            border-right: none;
+            border-bottom: none;
+            border-radius: 16px 0 0 0;
         }
 
-        .form-group {
-            margin-bottom: 32px;
+        .corner-br {
+            bottom: -1px;
+            right: -1px;
+            border-left: none;
+            border-top: none;
+            border-radius: 0 0 16px 0;
+        }
+
+        /* Setup Screen */
+        #setup-screen .form-group {
+            margin-bottom: 28px;
         }
 
         label {
             display: block;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             font-size: 0.8em;
             color: #999999;
             text-transform: uppercase;
@@ -179,54 +169,6 @@
             color: rgba(255, 255, 255, 0.3);
         }
 
-        button {
-            width: 100%;
-            padding: 18px;
-            font-size: 0.95em;
-            font-weight: 600;
-            font-family: 'Inter', sans-serif;
-            background: #ffffff;
-            border: none;
-            border-radius: 8px;
-            color: #000000;
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            position: relative;
-            overflow: hidden;
-        }
-
-        button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.1), transparent);
-            transition: left 0.5s;
-        }
-
-        button:hover::before {
-            left: 100%;
-        }
-
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(255, 255, 255, 0.2);
-        }
-
-        button:active {
-            transform: translateY(0);
-        }
-
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-
         .player-count-selector {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -235,7 +177,6 @@
         }
 
         .count-btn {
-            width: 100%;
             padding: 14px;
             font-size: 1.1em;
             font-weight: 700;
@@ -275,156 +216,133 @@
             font-size: 1.1em;
         }
 
-        .info-box {
-            margin-top: 32px;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-            text-align: center;
-        }
-
-        .info-box p {
-            font-size: 0.85em;
-            color: #666666;
-            line-height: 1.6;
-        }
-
-        .info-box strong {
-            color: #ffffff;
+        button {
+            width: 100%;
+            padding: 18px;
+            font-size: 0.95em;
             font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            background: #ffffff;
+            border: none;
+            border-radius: 8px;
+            color: #000000;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        /* Decorative corner elements */
-        .corner-tl,
-        .corner-br {
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(255, 255, 255, 0.2);
+        }
+
+        button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        /* Lobby Screen */
+        #lobby-screen {
+            display: none;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-bottom: 24px;
+        }
+
+        .status-badge.host {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .player-counter {
+            text-align: center;
+            font-size: 2.5em;
+            font-weight: 900;
+            font-family: 'JetBrains Mono', monospace;
+            margin: 24px 0;
+            color: #ffffff;
+        }
+
+        .player-counter .current {
+            font-size: 1.5em;
+        }
+
+        .players-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+            margin: 24px 0;
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 4px;
+        }
+
+        .player-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 16px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .player-card.me {
+            border-color: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .player-card.host-badge {
+            position: relative;
+        }
+
+        .player-card.host-badge::before {
+            content: '👑';
             position: absolute;
-            width: 40px;
-            height: 40px;
-            border: 2px solid rgba(255, 255, 255, 0.1);
+            top: -8px;
+            right: -8px;
+            font-size: 1.2em;
         }
 
-        .corner-tl {
-            top: -1px;
-            left: -1px;
-            border-right: none;
-            border-bottom: none;
-            border-radius: 16px 0 0 0;
+        .player-card .name {
+            font-weight: 600;
+            font-size: 0.95em;
+            word-break: break-word;
         }
 
-        .corner-br {
-            bottom: -1px;
-            right: -1px;
-            border-left: none;
-            border-top: none;
-            border-radius: 0 0 16px 0;
+        .waiting-message {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            margin: 20px 0;
+            font-size: 0.9em;
+            color: #888888;
         }
 
-        /* Footer */
-        .footer {
-            position: fixed;
-            bottom: 24px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 0.75em;
-            color: #333333;
-            letter-spacing: 0.05em;
-            z-index: 1;
+        .hidden {
+            display: none !important;
         }
 
         @media (max-width: 600px) {
-            .container {
-                width: 95%;
-            }
-
-            .logo {
-                margin-bottom: 40px;
-            }
-
             h1 {
                 font-size: 2.2em;
             }
 
-            .subtitle {
-                font-size: 0.85em;
-            }
-
             .card {
-                padding: 32px 20px;
+                padding: 32px 24px;
             }
 
-            label {
-                font-size: 0.75em;
-            }
-
-            input {
-                padding: 14px 16px;
-                font-size: 0.95em;
-            }
-
-            button {
-                padding: 16px;
-                font-size: 0.9em;
-            }
-
-            .info-box {
-                padding: 16px;
-                margin-top: 24px;
-            }
-
-            .info-box p {
-                font-size: 0.8em;
-            }
-
-            .corner-tl,
-            .corner-br {
-                width: 30px;
-                height: 30px;
-            }
-
-            .footer {
-                font-size: 0.65em;
-                bottom: 12px;
-            }
-        }
-
-        @media (max-width: 400px) {
-            h1 {
-                font-size: 1.8em;
-                letter-spacing: -0.02em;
-            }
-
-            .subtitle {
-                font-size: 0.75em;
-            }
-
-            .card {
-                padding: 28px 16px;
-            }
-
-            input {
-                padding: 12px 14px;
-                font-size: 0.9em;
-            }
-
-            button {
-                padding: 14px;
-                font-size: 0.85em;
-                letter-spacing: 0.05em;
-            }
-        }
-
-        @media (max-height: 700px) {
-            .logo {
-                margin-bottom: 30px;
-            }
-
-            h1 {
-                font-size: 2em;
-            }
-
-            .card {
-                padding: 24px 20px;
+            .players-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
             }
         }
     </style>
@@ -432,30 +350,30 @@
 <body>
     <div class="container">
         <div class="logo">
-            <h1>SURVIVAL QUIZ</h1>
-            <div class="subtitle">Last One Standing</div>
+            <h1>QUIZ ROYALE</h1>
+            <div class="subtitle">Battle Royale Quiz</div>
         </div>
 
         <div class="card">
             <div class="corner-tl"></div>
             <div class="corner-br"></div>
             
-            <form id="join-form">
+            <!-- Setup Screen (Name + Player Count) -->
+            <div id="setup-screen">
                 <div class="form-group">
-                    <label>Player Name</label>
+                    <label>Dein Spielername</label>
                     <input 
                         type="text" 
                         id="player-name" 
-                        placeholder="Enter your name..."
+                        placeholder="Name eingeben..."
                         maxlength="20"
-                        required
                         autocomplete="off"
                     >
                 </div>
 
                 <!-- Host: Player count selection -->
                 <div class="form-group" id="host-settings" style="display: none;">
-                    <label>Number of Players</label>
+                    <label>Anzahl der Spieler</label>
                     <div class="player-count-selector">
                         <button type="button" class="count-btn" data-count="2">2</button>
                         <button type="button" class="count-btn" data-count="3">3</button>
@@ -467,112 +385,302 @@
                         <button type="button" class="count-btn" data-count="9">9</button>
                         <button type="button" class="count-btn" data-count="10">10</button>
                     </div>
-                    <div class="selected-count" id="selected-count">
-                        Selected: <strong>2 Players</strong>
+                    <div class="selected-count">
+                        Ausgewählt: <strong id="selected-count-text">2 Spieler</strong>
                     </div>
                 </div>
 
-                <button type="submit">Join Battle</button>
-            </form>
+                <button id="join-lobby-btn">Lobby beitreten</button>
+            </div>
 
-            <div class="info-box">
-                <p id="info-text">
-                    Everyone who opens this link joins the <strong>same room</strong>.<br>
-                    Perfect for QR codes and easy sharing.
-                </p>
+            <!-- Lobby Screen (Waiting for players) -->
+            <div id="lobby-screen" class="hidden">
+                <div style="text-align: center;">
+                    <span class="status-badge" id="role-badge">Spieler</span>
+                </div>
+
+                <div class="player-counter">
+                    <span class="current" id="current-players">0</span>
+                    <span style="opacity: 0.4;">/</span>
+                    <span id="max-players">2</span>
+                </div>
+
+                <div class="players-grid" id="players-grid">
+                    <!-- Players will be added here -->
+                </div>
+
+                <div class="waiting-message" id="waiting-message">
+                    Warte auf weitere Spieler...
+                </div>
+
+                <button id="start-game-btn" disabled>Spiel starten</button>
             </div>
         </div>
     </div>
 
-    <div class="footer">
-        BATTLE ROYALE QUIZ SYSTEM
-    </div>
-
     <script>
         const FIXED_ROOM_CODE = 'BATTLE2026';
+        const WS_URL = 'wss://nosch.uber.space/web-rooms/';
         
-        const form = document.getElementById('join-form');
-        const nameInput = document.getElementById('player-name');
-        const hostSettings = document.getElementById('host-settings');
-        const infoText = document.getElementById('info-text');
+        let socket = null;
+        let keepAliveInterval = null;
         
-        let selectedPlayerCount = 2; // Default
-        let isHost = false;
+        const state = {
+            playerName: '',
+            playerId: null,
+            isHost: false,
+            maxPlayers: 2,
+            players: [],
+            roomCode: FIXED_ROOM_CODE
+        };
 
-        // Check if this is the first player (host)
-        const urlParams = new URLSearchParams(window.location.search);
-        const maxPlayers = urlParams.get('maxPlayers');
-        
-        if (!maxPlayers) {
-            // First player = Host
-            isHost = true;
-            hostSettings.style.display = 'block';
-            infoText.innerHTML = `
-                👑 <strong>You are the host!</strong><br>
-                Choose how many players will compete (2-10).
-            `;
+        // Initialize
+        window.addEventListener('DOMContentLoaded', init);
+
+        function init() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const maxPlayers = urlParams.get('maxPlayers');
             
-            // Setup count buttons
-            const countButtons = document.querySelectorAll('.count-btn');
-            countButtons.forEach(btn => {
-                // Select 2 by default
+            if (!maxPlayers) {
+                // First player = Host
+                state.isHost = true;
+                document.getElementById('host-settings').style.display = 'block';
+                setupPlayerCountSelector();
+            } else {
+                // Joining existing lobby
+                state.maxPlayers = parseInt(maxPlayers);
+                state.isHost = false;
+            }
+            
+            document.getElementById('join-lobby-btn').addEventListener('click', joinLobby);
+            document.getElementById('start-game-btn').addEventListener('click', startGame);
+            document.getElementById('player-name').focus();
+        }
+
+        function setupPlayerCountSelector() {
+            const buttons = document.querySelectorAll('.count-btn');
+            buttons.forEach(btn => {
                 if (btn.dataset.count === '2') {
                     btn.classList.add('selected');
                 }
                 
                 btn.addEventListener('click', () => {
-                    // Remove selection from all
-                    countButtons.forEach(b => b.classList.remove('selected'));
-                    // Select clicked button
+                    buttons.forEach(b => b.classList.remove('selected'));
                     btn.classList.add('selected');
-                    selectedPlayerCount = parseInt(btn.dataset.count);
-                    document.getElementById('selected-count').innerHTML = 
-                        `Selected: <strong>${selectedPlayerCount} Players</strong>`;
+                    state.maxPlayers = parseInt(btn.dataset.count);
+                    document.getElementById('selected-count-text').textContent = 
+                        `${state.maxPlayers} Spieler`;
                 });
             });
-        } else {
-            // Not host - joining existing game
-            isHost = false;
-            selectedPlayerCount = parseInt(maxPlayers);
-            infoText.innerHTML = `
-                🎮 Joining battle for <strong>${selectedPlayerCount} players</strong>!<br>
-                Waiting for everyone to join...
-            `;
         }
 
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            
-            const playerName = nameInput.value.trim();
-            
-            if (!playerName) {
-                alert('Please enter your name!');
+        function joinLobby() {
+            const name = document.getElementById('player-name').value.trim();
+            if (!name) {
+                alert('Bitte gib einen Namen ein!');
                 return;
             }
-
-            const playerId = Date.now();
             
-            const players = [{
-                id: playerId,
-                name: playerName,
-                eliminated: false
-            }];
+            state.playerName = name;
+            state.playerId = Date.now();
             
-            // Build URL with maxPlayers parameter
-            const gameUrl = `game.html?room=${FIXED_ROOM_CODE}&player=${encodeURIComponent(playerName)}&playerId=${playerId}&players=${encodeURIComponent(JSON.stringify(players))}&maxPlayers=${selectedPlayerCount}&isHost=${isHost}`;
+            // Switch to lobby screen
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('lobby-screen').classList.remove('hidden');
+            document.getElementById('max-players').textContent = state.maxPlayers;
             
-            window.location.href = gameUrl;
-        });
-
-        window.addEventListener('load', () => {
-            nameInput.focus();
-        });
-
-        nameInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                form.dispatchEvent(new Event('submit'));
+            // Update role badge
+            if (state.isHost) {
+                document.getElementById('role-badge').textContent = '👑 Host';
+                document.getElementById('role-badge').classList.add('host');
             }
-        });
+            
+            // Connect to WebSocket
+            connectWebSocket();
+        }
+
+        function connectWebSocket() {
+            console.log('🔌 Connecting to WebSocket...');
+            
+            socket = new WebSocket(WS_URL);
+            
+            socket.addEventListener('open', () => {
+                console.log('✅ WebSocket connected!');
+                
+                // Join room
+                sendRequest('join', state.roomCode);
+                
+                // Announce myself
+                broadcastPlayerJoined();
+                
+                // Start keep-alive
+                keepAliveInterval = setInterval(() => {
+                    if (socket && socket.readyState === WebSocket.OPEN) {
+                        socket.send(JSON.stringify(['*ping*']));
+                    }
+                }, 30000);
+            });
+            
+            socket.addEventListener('message', (event) => {
+                handleMessage(event.data);
+            });
+            
+            socket.addEventListener('close', () => {
+                console.log('🔌 WebSocket closed');
+                clearInterval(keepAliveInterval);
+                
+                // Reconnect after 2 seconds
+                setTimeout(() => connectWebSocket(), 2000);
+            });
+        }
+
+        function sendRequest(selector, ...args) {
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify([selector, ...args]));
+            }
+        }
+
+        function broadcastPlayerJoined() {
+            sendRequest('*broadcast-message*', JSON.stringify({
+                type: 'player-joined',
+                id: state.playerId,
+                name: state.playerName,
+                isHost: state.isHost,
+                maxPlayers: state.maxPlayers
+            }));
+            
+            // Add myself to players list
+            addPlayer({
+                id: state.playerId,
+                name: state.playerName,
+                isHost: state.isHost
+            });
+        }
+
+        function handleMessage(data) {
+            try {
+                const parsed = JSON.parse(data);
+                
+                // Handle broadcast messages
+                if (Array.isArray(parsed) && parsed.length === 1 && typeof parsed[0] === 'string') {
+                    const message = JSON.parse(parsed[0]);
+                    handleGameMessage(message);
+                } else if (Array.isArray(parsed) && parsed.length > 1) {
+                    const [selector, ...args] = parsed;
+                    if (args.length > 0 && typeof args[0] === 'string') {
+                        const message = JSON.parse(args[0]);
+                        handleGameMessage(message);
+                    }
+                }
+            } catch (e) {
+                // Ignore parse errors
+            }
+        }
+
+        function handleGameMessage(message) {
+            console.log('📨 Received:', message.type);
+            
+            switch (message.type) {
+                case 'player-joined':
+                    handlePlayerJoined(message);
+                    break;
+                case 'host-start-game':
+                    redirectToGame();
+                    break;
+            }
+        }
+
+        function handlePlayerJoined(data) {
+            // Don't add myself again
+            if (data.id === state.playerId) return;
+            
+            console.log('➕ Player joined:', data.name);
+            
+            // Update maxPlayers if host joined
+            if (data.isHost && data.maxPlayers) {
+                state.maxPlayers = data.maxPlayers;
+                document.getElementById('max-players').textContent = state.maxPlayers;
+            }
+            
+            addPlayer(data);
+        }
+
+        function addPlayer(player) {
+            // Check if already exists
+            if (state.players.find(p => p.id === player.id)) return;
+            
+            state.players.push(player);
+            updatePlayersDisplay();
+        }
+
+        function updatePlayersDisplay() {
+            const grid = document.getElementById('players-grid');
+            grid.innerHTML = '';
+            
+            state.players.forEach(player => {
+                const card = document.createElement('div');
+                card.className = 'player-card';
+                
+                if (player.id === state.playerId) {
+                    card.classList.add('me');
+                }
+                
+                if (player.isHost) {
+                    card.classList.add('host-badge');
+                }
+                
+                card.innerHTML = `<div class="name">${player.name}</div>`;
+                grid.appendChild(card);
+            });
+            
+            // Update counter
+            document.getElementById('current-players').textContent = state.players.length;
+            
+            // Update messages and buttons
+            if (state.players.length >= state.maxPlayers) {
+                document.getElementById('waiting-message').textContent = 
+                    'Alle Spieler sind da! Host kann das Spiel starten.';
+                
+                if (state.isHost) {
+                    document.getElementById('start-game-btn').disabled = false;
+                }
+            } else {
+                document.getElementById('waiting-message').textContent = 
+                    `Warte auf ${state.maxPlayers - state.players.length} weitere Spieler...`;
+            }
+        }
+
+        function startGame() {
+            if (!state.isHost) return;
+            if (state.players.length < state.maxPlayers) {
+                alert('Nicht alle Spieler sind da!');
+                return;
+            }
+            
+            console.log('🎮 Host starting game!');
+            
+            // Broadcast game start
+            sendRequest('*broadcast-message*', JSON.stringify({
+                type: 'host-start-game',
+                players: state.players
+            }));
+            
+            // Redirect myself
+            redirectToGame();
+        }
+
+        function redirectToGame() {
+            const params = new URLSearchParams({
+                room: state.roomCode,
+                player: state.playerName,
+                playerId: state.playerId,
+                isHost: state.isHost,
+                maxPlayers: state.maxPlayers,
+                players: JSON.stringify(state.players)
+            });
+            
+            window.location.href = `game.html?${params.toString()}`;
+        }
     </script>
 </body>
 </html>
