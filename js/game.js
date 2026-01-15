@@ -1,5 +1,5 @@
 
-// WWM Battle Royale - Game Logic (without A-Frame, 2D Grid)
+// WWM Battle Royale - Game Logic (without A-Frame, 2D Grid)h
 
 const gameState = {
     playerName: 'none',
