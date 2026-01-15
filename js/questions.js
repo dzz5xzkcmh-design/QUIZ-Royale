@@ -254,7 +254,7 @@ const QUESTIONS_POOL = [
     }
 ];
 
-// Shuffle questions on load
+// Shuffle questions on loads
 const QUESTIONS = shuffleArray(QUESTIONS_POOL);
 
 console.log('📝 Fragen wurden gemischt! Erste Frage:', QUESTIONS[0]?.question);
