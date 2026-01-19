@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QUIZ ROYALE</title>
+    
+    <!-- Three.js for 3D Star System -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
         
@@ -23,6 +27,17 @@
             justify-content: center;
             position: relative;
             overflow: hidden;
+        }
+
+        /* Three.js Canvas for Stars */
+        #star-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.7;
         }
 
         /* Subtle grid patterns */
@@ -430,6 +445,9 @@
     </style>
 </head>
 <body>
+    <!-- Three.js Canvas -->
+    <canvas id="star-canvas"></canvas>
+
     <div class="container">
         <div class="logo">
             <h1>QUIZ ROYALE</h1>
@@ -474,6 +492,145 @@
      QUIZ ROYALE by Tim Heilemann & Niklas Zuckschwerdt
     </div>
 
+    <!-- Three.js Star System Script -->
+    <script>
+        // Initialize Three.js star particle system
+        function initStars() {
+            const canvas = document.getElementById('star-canvas');
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ 
+                canvas: canvas, 
+                alpha: true,
+                antialias: true
+            });
+            
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            camera.position.z = 50;
+
+            // Create star texture
+            function createStarTexture() {
+                const size = 64;
+                const canvas = document.createElement('canvas');
+                canvas.width = size;
+                canvas.height = size;
+                const ctx = canvas.getContext('2d');
+                
+                const gradient = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
+                gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+                gradient.addColorStop(0.2, 'rgba(255, 255, 255, 0.8)');
+                gradient.addColorStop(0.4, 'rgba(255, 255, 255, 0.4)');
+                gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, size, size);
+                
+                return new THREE.CanvasTexture(canvas);
+            }
+
+            const starLayers = [];
+            
+            // Create star layers
+            createStarLayer(800, 0.7, 1.0, 100);
+            createStarLayer(400, 1.3, 1.7, 80);
+            createStarLayer(150, 4.3, 5.9, 60);
+
+            function createStarLayer(count, minSize, maxSize, spread) {
+                const geometry = new THREE.BufferGeometry();
+                const positions = new Float32Array(count * 3);
+                const sizes = new Float32Array(count);
+                const alphas = new Float32Array(count);
+
+                for (let i = 0; i < count; i++) {
+                    positions[i * 3] = (Math.random() - 0.5) * spread * 2;
+                    positions[i * 3 + 1] = (Math.random() - 0.5) * spread * 2;
+                    positions[i * 3 + 2] = (Math.random() - 0.5) * spread;
+                    sizes[i] = Math.random() * (maxSize - minSize) + minSize;
+                    alphas[i] = Math.random();
+                }
+
+                geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+                geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+                geometry.setAttribute('alpha', new THREE.BufferAttribute(alphas, 1));
+
+                const material = new THREE.ShaderMaterial({
+                    uniforms: {
+                        time: { value: 0 },
+                        starTexture: { value: createStarTexture() }
+                    },
+                    vertexShader: `
+                        attribute float size;
+                        attribute float alpha;
+                        varying float vAlpha;
+                        uniform float time;
+                        
+                        void main() {
+                            vAlpha = alpha;
+                            vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+                            float twinkle = sin(time + position.x * 10.0 + position.y * 10.0) * 0.3 + 0.7;
+                            gl_PointSize = size * twinkle * (300.0 / -mvPosition.z);
+                            gl_Position = projectionMatrix * mvPosition;
+                        }
+                    `,
+                    fragmentShader: `
+                        precision highp float;
+                        uniform sampler2D starTexture;
+                        varying float vAlpha;
+                        
+                        void main() {
+                            vec4 texColor = texture2D(starTexture, gl_PointCoord);
+                            gl_FragColor = vec4(texColor.rgb, texColor.a * vAlpha);
+                        }
+                    `,
+                    transparent: true,
+                    depthWrite: false,
+                    blending: THREE.AdditiveBlending
+                });
+
+                const stars = new THREE.Points(geometry, material);
+                scene.add(stars);
+                starLayers.push({ mesh: stars, material: material });
+            }
+
+            let mouseX = 0;
+            let mouseY = 0;
+            let time = 0;
+
+            document.addEventListener('mousemove', (event) => {
+                mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+                mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+            });
+
+            function animate() {
+                requestAnimationFrame(animate);
+                time += 0.01;
+
+                starLayers.forEach((layer, index) => {
+                    layer.material.uniforms.time.value = time + index * 0.5;
+                    layer.mesh.rotation.x += 0.0001 * (index + 1);
+                    layer.mesh.rotation.y += 0.0002 * (index + 1);
+                    layer.mesh.rotation.x += mouseY * 0.00005 * (index + 1);
+                    layer.mesh.rotation.y += mouseX * 0.00005 * (index + 1);
+                });
+
+                renderer.render(scene, camera);
+            }
+
+            animate();
+
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        }
+
+        // Start stars when page loads
+        window.addEventListener('DOMContentLoaded', initStars);
+    </script>
+
+    <!-- Original Game Logic -->
     <script>
         const FIXED_ROOM_CODE = 'BATTLE2026';
         
@@ -482,15 +639,13 @@
         const hostSettings = document.getElementById('host-settings');
         const infoText = document.getElementById('info-text');
         
-        let selectedPlayerCount = 2; // Default
+        let selectedPlayerCount = 2;
         let isHost = false;
 
-        // Check if this is the first player (host)
         const urlParams = new URLSearchParams(window.location.search);
         const maxPlayers = urlParams.get('maxPlayers');
         
         if (!maxPlayers) {
-            // First player = Host
             isHost = true;
             hostSettings.style.display = 'block';
             infoText.innerHTML = `
@@ -498,18 +653,14 @@
                 Choose how many players will compete (2-10).
             `;
             
-            // Setup count buttons
             const countButtons = document.querySelectorAll('.count-btn');
             countButtons.forEach(btn => {
-                // Select 2 by default
                 if (btn.dataset.count === '2') {
                     btn.classList.add('selected');
                 }
                 
                 btn.addEventListener('click', () => {
-                    // Remove selection from all
                     countButtons.forEach(b => b.classList.remove('selected'));
-                    // Select clicked button
                     btn.classList.add('selected');
                     selectedPlayerCount = parseInt(btn.dataset.count);
                     document.getElementById('selected-count').innerHTML = 
@@ -517,7 +668,6 @@
                 });
             });
         } else {
-            // Not host - joining existing game
             isHost = false;
             selectedPlayerCount = parseInt(maxPlayers);
             infoText.innerHTML = `
@@ -544,7 +694,6 @@
                 eliminated: false
             }];
             
-            // Build URL with maxPlayers parameter
             const gameUrl = `game.html?room=${FIXED_ROOM_CODE}&player=${encodeURIComponent(playerName)}&playerId=${playerId}&players=${encodeURIComponent(JSON.stringify(players))}&maxPlayers=${selectedPlayerCount}&isHost=${isHost}`;
             
             window.location.href = gameUrl;
@@ -562,5 +711,3 @@
     </script>
 </body>
 </html>
-
-    
